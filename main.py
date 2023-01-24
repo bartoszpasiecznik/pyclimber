@@ -4,6 +4,13 @@ import sys
 import random
 import time
 
+#TODO:
+# Przetłumaczyć zmienne na Polski
+# Dodać komentarze do tego, co robią dane funkcje
+# Powiększyć okienko (900 x 800)
+# Neutralne assety dodać xd
+
+
 pygame.init()
 pygame.mixer.init()
 vec = pygame.math.Vector2  # 2 for two dimensional
@@ -212,7 +219,7 @@ while True:
             if event.key == pygame.K_UP:
                 P1.cancel_jump()
 
-        if P1.rect.top > HEIGHT:
+        if P1.rect.top > HEIGHT: #Funkcja wykonuje się, gdy gracz spadnie pod mapę
             for entity in all_sprites:
                 entity.kill()
                 time.sleep(1)
@@ -225,7 +232,7 @@ while True:
                 pygame.quit()
                 sys.exit()
 
-    if P1.rect.top <= HEIGHT / 3:
+    if P1.rect.top <= HEIGHT / 3: #Scrollowanie ekranu do góry
         P1.pos.y += abs(P1.vel.y)
         for plat in platforms:
             plat.rect.y += abs(P1.vel.y)
