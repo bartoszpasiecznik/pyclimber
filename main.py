@@ -5,6 +5,7 @@ import random
 import time
 
 pygame.init()
+pygame.mixer.init()
 vec = pygame.math.Vector2  # 2 for two dimensional
 
 HEIGHT = 450
@@ -13,10 +14,17 @@ ACC = 0.5
 FRIC = -0.12
 FPS = 60
 
+
+bgm = pygame.mixer.music.load("barka.mp3")
+pygame.mixer.music.play(-1)
+
+kremowki = pygame.mixer.Sound("kremowki.mp3")
+eating = pygame.mixer.Sound("eating.mp3")
+
 FramePerSec = pygame.time.Clock()
 
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Game")
+pygame.display.set_caption("PyClimber")
 
 background = pygame.image.load("background.png")
 
@@ -90,6 +98,8 @@ class Coin(pygame.sprite.Sprite):
     def update(self):
         if self.rect.colliderect(P1.rect):
             P1.score += 5
+            pygame.mixer.Sound.play(eating)
+            pygame.mixer.Sound.play(kremowki)
             self.kill()
 
 
@@ -188,14 +198,18 @@ for x in range(random.randint(4, 5)):
 while True:
     P1.update()
     for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_UP:
                 P1.jump()
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_UP:
                 P1.cancel_jump()
 
         if P1.rect.top > HEIGHT:
