@@ -54,6 +54,7 @@ class Player(pygame.sprite.Sprite):
 
         if pressed_keys[K_LEFT]:
             self.acc.x = -ACC
+            print(self.acc.x)
         if pressed_keys[K_RIGHT]:
             self.acc.x = ACC
 
@@ -132,10 +133,12 @@ class platform(pygame.sprite.Sprite):
         hits = self.rect.colliderect(P1.rect)
         if self.moving == True:
             self.rect.move_ip(self.speed, 0)
+
             if hits:
                 P1.pos += (self.speed, 0)
             if self.speed > 0 and self.rect.left > WIDTH:
                 self.rect.right = 0
+
             if self.speed < 0 and self.rect.right < 0:
                 self.rect.left = WIDTH
 
@@ -151,10 +154,10 @@ def check(platform, groupies):
         for entity in groupies:
             if entity == platform:
                 continue
-            if (abs(platform.rect.top - entity.rect.bottom) < 40) and (
-                    abs(platform.rect.bottom - entity.rect.top) < 40):
-                return True
-        C = False
+        if (abs(platform.rect.top - entity.rect.bottom) < 50) and (
+                abs(platform.rect.bottom - entity.rect.top) < 50):
+            return True
+    C = False
 
 
 def plat_gen():
@@ -166,7 +169,7 @@ def plat_gen():
         while C:
             p = platform()
             p.rect.center = (random.randrange(0, WIDTH - width),
-                             random.randrange(-50, 0))
+                             random.randrange(-40, 0))
             C = check(p, platforms)
 
         p.generateCoin()
