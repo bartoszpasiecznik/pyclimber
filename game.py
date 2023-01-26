@@ -29,7 +29,8 @@ class Gracz(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
-        self.surf = pygame.image.load("gracz.png")
+        self.jumpanimation = [pygame.image.load("gracz1.png"),pygame.image.load("gracz2.png"),pygame.image.load("gracz3.png"),pygame.image.load("gracz4.png")]
+        self.surf = pygame.image.load("gracz1.png")
         self.rect = self.surf.get_rect()
 
         #Inicjalizacja zmiennych
@@ -37,7 +38,9 @@ class Gracz(pygame.sprite.Sprite):
         self.vel = vec(0,0)
         self.acc = vec(0,0)
         self.czySkacze = False
+        self.czyRuch = False
         self.wynik = 0
+        self.moveframe = 0
 
     def ruch(self):
         self.acc = vec(0, 0.5) #Grawitacja
@@ -64,9 +67,10 @@ class Gracz(pygame.sprite.Sprite):
 
     def skok(self): #Skok
         kolizja = pygame.sprite.spritecollide(self, platformy, False)
+        self.moveframe = random.randint(1, 3)
         if kolizja and not self.czySkacze:
+            self.surf = self.jumpanimation[self.moveframe]
             self.czySkacze = True
-            self.surf = pygame.image.load("gracz.png")
             pygame.mixer.Sound.play(skokDzwiek)
             self.vel.y = -15
 
@@ -77,6 +81,8 @@ class Gracz(pygame.sprite.Sprite):
 
     def update(self):
         kolizja = pygame.sprite.spritecollide(self, platformy, False)
+        if self.moveframe == 0:
+            self.surf = self.jumpanimation[self.moveframe]
         if self.vel.y > 0:
             if kolizja:
                 if self.pos.y < kolizja[0].rect.bottom:
@@ -118,13 +124,14 @@ class Platforma(pygame.sprite.Sprite):
         self.czyRuch = True
         self.speed = random.randint(-1, 1) #Szansa na wystąpienie ruchu platformy w obu kierunkach
         self.szansaMonety = random.randint(0, 4) #Szansa na pojawienie się monety
-
         if self.speed == 0:
             self.czyRuch = False
 
     def ruch(self): #Ruch platform
         kolizja = self.rect.colliderect(G1.rect)
         if self.czyRuch == True:
+            # self.speed = (self.speed + (G1.wynik / 10)) * random.random()
+            # self.speed = self.speed * G1.wynik/10
             self.rect.move_ip(self.speed, 0)
             if kolizja:
                 G1.pos += (self.speed, 0)
@@ -218,6 +225,7 @@ while True:
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
                 G1.anulujSkok()
+                G1.moveframe = 0
 
         # Ekran Śmierci
 
