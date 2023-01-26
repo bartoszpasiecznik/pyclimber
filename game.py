@@ -11,19 +11,21 @@ pygame.init()
 pygame.mixer.init()
 vec = pygame.math.Vector2  # dwuwymiarowy wektor
 
-HEIGHT = 900 #Wysokosc Ekranu
-WIDTH = 800 #Szerokosc Ekranu
-ACC = 0.5 #Przyspieszenie
-FRIC = -0.12 #Wartosc Tarcia
-FPS = 60 #Czestotliwosc odswiezania ekranu
-PLATFORMNUMBER = 15 #Ilosc platform na ekranie
+HEIGHT = 900  # Wysokosc Ekranu
+WIDTH = 800  # Szerokosc Ekranu
+ACC = 0.5  # Przyspieszenie
+FRIC = -0.12  # Wartosc Tarcia
+FPS = 60  # Czestotliwosc odswiezania ekranu
+PLATFORMNUMBER = 15  # Ilosc platform na ekranie
+WYNIK = 0
 
 FramePerSec = pygame.time.Clock()
-okno = pygame.display.set_mode((WIDTH, HEIGHT)) # Inicjalizacja okna
+okno = pygame.display.set_mode((WIDTH, HEIGHT))  # Inicjalizacja okna
 pygame.display.set_caption("PyClimber")
 
-tloObraz = pygame.image.load("background.png") #Dodanie tła
+tloObraz = pygame.image.load("background.png")  # Dodanie tła
 tlo = pygame.transform.scale(tloObraz, (WIDTH, HEIGHT))
+
 
 class Gracz(pygame.sprite.Sprite):
 
@@ -35,19 +37,20 @@ class Gracz(pygame.sprite.Sprite):
         self.surf = pygame.image.load("gracz1.png")
         self.rect = self.surf.get_rect()
 
-        #Inicjalizacja zmiennych
-        self.pos = vec((WIDTH/2 ,HEIGHT - 20 )) #Pozycja gracza
-        self.vel = vec(0,0)
-        self.acc = vec(0,0)
+        # Inicjalizacja zmiennych
+        self.pos = vec((WIDTH / 2, HEIGHT - 20))  # Pozycja gracza
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
         self.czySkacze = False
         self.czyRuch = False
         self.wynik = 0
         self.moveframe = 0
 
     def ruch(self):
-        self.acc = vec(0, 0.5) #Grawitacja
+        self.acc = vec(0, 0.5)  # Grawitacja
         nacisniete_klawisze = pygame.key.get_pressed()
-        if not self.czyRuch and not self.czySkacze and not nacisniete_klawisze[K_LEFT] and not nacisniete_klawisze[K_RIGHT]:
+        if not self.czyRuch and not self.czySkacze and not nacisniete_klawisze[K_LEFT] and not \
+                nacisniete_klawisze[K_RIGHT]:
             self.moveframe = 0
         if nacisniete_klawisze[K_LEFT]:  # Nadanie przyspieszenia po nacisnieciu klawisza
             self.moveframe = 4
@@ -60,14 +63,14 @@ class Gracz(pygame.sprite.Sprite):
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc
 
-        if self.pos.x > WIDTH: #Teleportacja gracza na druga strone
+        if self.pos.x > WIDTH:  # Teleportacja gracza na druga strone
             self.pos.x = 0
         if self.pos.x < 0:
             self.pos.x = WIDTH
 
         self.rect.midbottom = self.pos
 
-    def skok(self): #Skok
+    def skok(self):  # Skok
         kolizja = pygame.sprite.spritecollide(self, platformy, False)
         self.moveframe = random.randint(1, 3)
         if kolizja and not self.czySkacze:
@@ -76,7 +79,7 @@ class Gracz(pygame.sprite.Sprite):
             pygame.mixer.Sound.play(skokDzwiek)
             self.vel.y = -15
 
-    def anulujSkok(self): # Anulowanie skoku przy puszczeniu klawisza
+    def anulujSkok(self):  # Anulowanie skoku przy puszczeniu klawisza
         if self.czySkacze:
             if self.vel.y < -3:
                 self.vel.y = -3
@@ -90,16 +93,18 @@ class Gracz(pygame.sprite.Sprite):
                     if kolizja[0].point:
                         kolizja[0].point = False
                         self.wynik += 1
-                        # global WYNIK
-                        # WYNIK += 1
+                        global WYNIK
+                        WYNIK += 1
                     self.pos.y = kolizja[0].rect.top + 1
                     self.vel.y = 0
                     self.czySkacze = False
+
 
 class Moneta(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
 
+        # wczytanie i odpowiednie wyskalowanie grafiki monety
         self.imageLoad = pygame.image.load("moneta.png")
         self.image = pygame.transform.scale(self.imageLoad, (25, 25))
         self.rect = self.image.get_rect()
@@ -108,18 +113,20 @@ class Moneta(pygame.sprite.Sprite):
     def update(self):
         if self.rect.colliderect(G1.rect):
             G1.wynik += 5
-            # global WYNIK
-            # WYNIK += 5
+            global WYNIK
+            WYNIK += 5
             pygame.mixer.Sound.play(monetaDzwiek)
             self.kill()
 
+
 class Platforma(pygame.sprite.Sprite):
-    def __init__(self, width = 0, height = 18):
+    def __init__(self, width=0, height=18):
         super().__init__()
 
         if width == 0:
             width = random.randint(100, 200)
 
+        self.czyPlatformaPrzeskoczona = False
         self.image = pygame.image.load("platform.png")
         self.surf = pygame.transform.scale(self.image, (width, height))
         self.rect = self.surf.get_rect(center=(random.randint(0, WIDTH - 10),
@@ -127,16 +134,22 @@ class Platforma(pygame.sprite.Sprite):
 
         self.point = True
         self.czyRuch = True
-        self.speed = random.randint(-1, 1) #Szansa na wystąpienie ruchu platformy w obu kierunkach
-        self.szansaMonety = random.randint(0, 4) #Szansa na pojawienie się monety
+        # Generujemy predkosc poruszania sie platformy, wartosci ujemne to poruszanie sie 'w lewo', wartosci dodanie
+        # 'w prawo', zero oznacza brak ruchu
+        # Generujemy wartosc z zakresu [-1, 1] i mnozymy przez wynik a nastepnie 0.025
+        # w celu stopniowego zwiekszania predkosci poruszania sie platform
+        self.speed = random.randint(-1, 1) * (WYNIK + 5) * 0.025
+        self.szansaMonety = random.randint(0, 4)  # Szansa na pojawienie się monety
         if self.speed == 0:
             self.czyRuch = False
 
-    def ruch(self): #Ruch platform
+    def ruch(self):  # Ruch platform
         kolizja = self.rect.colliderect(G1.rect)
         if self.czyRuch == True:
-            # self.speed = (self.speed + (G1.wynik / 10)) * random.random()
-            # self.speed = self.speed * G1.wynik/10
+            # Jesli self.speed jest w zakresie [-1, 1] unieruchamiamy
+            # platforme nadajac self.speed wartosc 0
+            if 1 > self.speed > -1 and self.speed != 0:
+                self.speed = 0
             self.rect.move_ip(self.speed, 0)
             if kolizja:
                 G1.pos += (self.speed, 0)
@@ -146,10 +159,11 @@ class Platforma(pygame.sprite.Sprite):
                 self.rect.left = WIDTH
 
     def generujMonety(self):
-        if self.speed == 0 and self.szansaMonety == 0: #Generacja monety gdy platforma jest statyczna
+        if self.speed == 0 and self.szansaMonety == 0:  # Generacja monety gdy platforma jest statyczna
             monety.add(Moneta((self.rect.centerx, self.rect.centery - 50)))
 
-def check(platform, grupy):   # Funkcja sprawdza, czy w otoczeniu X jednostek znajduje się platforma
+
+def check(platform, grupy):  # Funkcja sprawdza, czy w otoczeniu X jednostek znajduje się platforma
     if pygame.sprite.spritecollideany(platform, grupy):
         return True
     else:
@@ -157,13 +171,14 @@ def check(platform, grupy):   # Funkcja sprawdza, czy w otoczeniu X jednostek zn
             if obiekt == platform:
                 continue
             if (abs(platform.rect.top - obiekt.rect.bottom) < 40) and (
-                        abs(platform.rect.bottom - obiekt.rect.top) < 40):
+                    abs(platform.rect.bottom - obiekt.rect.top) < 40):
                 return True
         C = False
 
+
 def generacjaPlatform():
     while len(platformy) < PLATFORMNUMBER:
-        width = random.randrange (50, 100)
+        width = random.randrange(50, 100)
         p = None
         C = True
 
@@ -177,12 +192,13 @@ def generacjaPlatform():
         platformy.add(p)
         wszystkie_sprity.add(p)
 
+
 wszystkie_sprity = pygame.sprite.Group()
 platformy = pygame.sprite.Group()
 monety = pygame.sprite.Group()
 
 PT1 = Platforma(WIDTH, 80)
-PT1.rect = PT1.surf.get_rect(center = (WIDTH/2, HEIGHT - 10))
+PT1.rect = PT1.surf.get_rect(center=(WIDTH / 2, HEIGHT - 10))
 PT1.czyRuch = False
 PT1.point = False
 
@@ -193,14 +209,14 @@ wszystkie_sprity.add(G1)
 platformy.add(PT1)
 
 # Dzwiek
-muzykaTlo = pygame.mixer.music.load("bgm.mp3") #Wczytanie muzyki odtwarzanej w tle
+muzykaTlo = pygame.mixer.music.load("bgm.mp3")  # Wczytanie muzyki odtwarzanej w tle
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.3)
 
-monetaDzwiek = pygame.mixer.Sound("moneta.mp3") #Dzwiek zebrania monety
+monetaDzwiek = pygame.mixer.Sound("moneta.mp3")  # Dzwiek zebrania monety
 skokDzwiek = pygame.mixer.Sound("skok.mp3")
 
-#Wstepna generacja platform
+# Wstepna generacja platform
 for x in range(random.randint(PLATFORMNUMBER - 2, PLATFORMNUMBER - 1)):
     C = True
     pl = Platforma()
@@ -233,7 +249,7 @@ while True:
 
         # Ekran Śmierci
 
-        if G1.rect.top > HEIGHT: #Funkcja wykonuje się, gdy gracz spadnie pod mapę
+        if G1.rect.top > HEIGHT:  # Funkcja wykonuje się, gdy gracz spadnie pod mapę
             for entity in wszystkie_sprity:
                 entity.kill()
                 time.sleep(1)
@@ -246,7 +262,7 @@ while True:
                 pygame.quit()
                 sys.exit()
 
-    if G1.rect.top <= HEIGHT/3: #Scrollowanie ekranu
+    if G1.rect.top <= HEIGHT / 3:  # Scrollowanie ekranu
         G1.pos.y += abs(G1.vel.y)
         for plat in platformy:
             plat.rect.y += abs(G1.vel.y)
@@ -259,9 +275,9 @@ while True:
                 moneta.kill()
 
     generacjaPlatform()
-    okno.blit(tlo, (0,0))
+    okno.blit(tlo, (0, 0))
     f = pygame.font.SysFont("Verdana", 20)
-    g = f.render("Wynik " + str(G1.wynik), True, (123, 255, 0))  # Wyświetlanie wyniku
+    g = f.render("Wynik " + str(WYNIK), True, (123, 255, 0))  # Wyświetlanie wyniku
     okno.blit(g, (WIDTH / 2 - 50, 10))
 
     for obiekt in wszystkie_sprity:
