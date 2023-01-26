@@ -4,12 +4,12 @@ import sys
 import random
 import time
 
-#TODO:
+# TODO:
 # Neutralne assety dodać xd
 
 pygame.init()
 pygame.mixer.init()
-vec = pygame.math.Vector2 #dwuwymiarowy wektor
+vec = pygame.math.Vector2  # dwuwymiarowy wektor
 
 HEIGHT = 900 #Wysokosc Ekranu
 WIDTH = 800 #Szerokosc Ekranu
@@ -29,7 +29,9 @@ class Gracz(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
-        self.jumpanimation = [pygame.image.load("gracz1.png"),pygame.image.load("gracz2.png"),pygame.image.load("gracz3.png"),pygame.image.load("gracz4.png")]
+        self.jumpanimation = [pygame.image.load("gracz1.png"), pygame.image.load("gracz2.png"),
+                              pygame.image.load("gracz3.png"), pygame.image.load("gracz4.png"),
+                              pygame.image.load("graczlewo.png"), pygame.image.load("graczprawo.png")]
         self.surf = pygame.image.load("gracz1.png")
         self.rect = self.surf.get_rect()
 
@@ -45,13 +47,13 @@ class Gracz(pygame.sprite.Sprite):
     def ruch(self):
         self.acc = vec(0, 0.5) #Grawitacja
         nacisniete_klawisze = pygame.key.get_pressed()
-
-
-        if nacisniete_klawisze[K_LEFT]: #Nadanie przyspieszenia po nacisnieciu klawisza
-            self.surf = pygame.image.load("graczlewo.png")
+        if not self.czyRuch and not self.czySkacze and not nacisniete_klawisze[K_LEFT] and not nacisniete_klawisze[K_RIGHT]:
+            self.moveframe = 0
+        if nacisniete_klawisze[K_LEFT]:  # Nadanie przyspieszenia po nacisnieciu klawisza
+            self.moveframe = 4
             self.acc.x = -ACC
         if nacisniete_klawisze[K_RIGHT]:
-            self.surf = pygame.image.load("graczprawo.png")
+            self.moveframe = 5
             self.acc.x = ACC
 
         self.acc.x += self.vel.x * FRIC
@@ -81,14 +83,15 @@ class Gracz(pygame.sprite.Sprite):
 
     def update(self):
         kolizja = pygame.sprite.spritecollide(self, platformy, False)
-        if self.moveframe == 0:
-            self.surf = self.jumpanimation[self.moveframe]
+        self.surf = self.jumpanimation[self.moveframe]
         if self.vel.y > 0:
             if kolizja:
                 if self.pos.y < kolizja[0].rect.bottom:
                     if kolizja[0].point:
                         kolizja[0].point = False
                         self.wynik += 1
+                        # global WYNIK
+                        # WYNIK += 1
                     self.pos.y = kolizja[0].rect.top + 1
                     self.vel.y = 0
                     self.czySkacze = False
@@ -105,6 +108,8 @@ class Moneta(pygame.sprite.Sprite):
     def update(self):
         if self.rect.colliderect(G1.rect):
             G1.wynik += 5
+            # global WYNIK
+            # WYNIK += 5
             pygame.mixer.Sound.play(monetaDzwiek)
             self.kill()
 
@@ -225,7 +230,6 @@ while True:
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
                 G1.anulujSkok()
-                G1.moveframe = 0
 
         # Ekran Śmierci
 
@@ -257,8 +261,8 @@ while True:
     generacjaPlatform()
     okno.blit(tlo, (0,0))
     f = pygame.font.SysFont("Verdana", 20)
-    g = f.render(str(G1.wynik), True, (123, 255, 0)) # Wyświetlanie wyniku
-    okno.blit(g, (WIDTH / 2, 10))
+    g = f.render("Wynik " + str(G1.wynik), True, (123, 255, 0))  # Wyświetlanie wyniku
+    okno.blit(g, (WIDTH / 2 - 50, 10))
 
     for obiekt in wszystkie_sprity:
         okno.blit(obiekt.surf, obiekt.rect)
