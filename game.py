@@ -18,6 +18,9 @@ FRIC = -0.12  # Wartosc Tarcia
 FPS = 60  # Czestotliwosc odswiezania ekranu
 PLATFORMNUMBER = 15  # Ilosc platform na ekranie
 WYNIK = 0
+f = open("best_score.txt", "r")
+NAJLEPSZY_WYNIK = int(f.read())
+
 
 FramePerSec = pygame.time.Clock()
 okno = pygame.display.set_mode((WIDTH, HEIGHT))  # Inicjalizacja okna
@@ -138,7 +141,7 @@ class Platforma(pygame.sprite.Sprite):
         # 'w prawo', zero oznacza brak ruchu
         # Generujemy wartosc z zakresu [-1, 1] i mnozymy przez wynik a nastepnie 0.025
         # w celu stopniowego zwiekszania predkosci poruszania sie platform
-        self.speed = random.randint(-1, 1) * (WYNIK + 5) * 0.025
+        self.speed = random.randint(-1, 1) * (WYNIK + 5) * 0.01
         self.szansaMonety = random.randint(0, 4)  # Szansa na pojawienie się monety
         if self.speed == 0:
             self.czyRuch = False
@@ -251,14 +254,16 @@ while True:
 
         if G1.rect.top > HEIGHT:  # Funkcja wykonuje się, gdy gracz spadnie pod mapę
             for entity in wszystkie_sprity:
+                with open('best_score.txt', 'w') as s:
+                    s.write(str(NAJLEPSZY_WYNIK))
                 entity.kill()
                 time.sleep(1)
                 okno.fill((255, 0, 0))
-                d = pygame.font.SysFont("Comic Sans", 20)
-                dead = d.render("You dead bruv", True, (0, 0, 255))
-                okno.blit(dead, (WIDTH / 2, HEIGHT / 2))
+                d = pygame.font.SysFont("Arial", 35)
+                dead = d.render("Koniec gry", True, (0, 0, 0))
+                okno.blit(dead, (WIDTH / 2 - 60, HEIGHT / 2))
                 pygame.display.update()
-                time.sleep(1)
+                time.sleep(5)
                 pygame.quit()
                 sys.exit()
 
@@ -268,19 +273,26 @@ while True:
             plat.rect.y += abs(G1.vel.y)
             if plat.rect.top >= HEIGHT:
                 plat.kill()
+                WYNIK += 1
 
         for moneta in monety:
             moneta.rect.y += abs(G1.vel.y)
             if moneta.rect.top >= HEIGHT:
                 moneta.kill()
 
+    if WYNIK > NAJLEPSZY_WYNIK:
+        NAJLEPSZY_WYNIK = WYNIK
     generacjaPlatform()
     okno.blit(tlo, (0, 0))
-    f = pygame.font.SysFont("Verdana", 20)
-    g = f.render("Wynik " + str(WYNIK), True, (123, 255, 0))  # Wyświetlanie wyniku
-    okno.blit(g, (WIDTH / 2 - 50, 10))
+    f1 = pygame.font.SysFont("Verdana", 20)
+    f2 = pygame.font.SysFont("Verdana", 20)
+    g1 = f1.render("Wynik " + str(WYNIK), True, (123, 255, 0))  # Wyświetlanie wyniku
+    g2 = f2.render("Najlepszy wynik " + str(NAJLEPSZY_WYNIK), True, (123, 255, 0))  # Wyświetlanie wyniku
+    okno.blit(g1, (WIDTH / 2 - 50, 10))
+    okno.blit(g2, (WIDTH - 300, 10))
 
     for obiekt in wszystkie_sprity:
+        okno.blit(obiekt.surf, obiekt.rect)
         okno.blit(obiekt.surf, obiekt.rect)
         obiekt.ruch()
 
