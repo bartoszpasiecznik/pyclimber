@@ -4,8 +4,6 @@ import sys
 import random
 import time
 
-# TODO:
-# Neutralne assety dodać xd
 
 pygame.init()
 pygame.mixer.init()
@@ -20,6 +18,7 @@ PLATFORMNUMBER = 15  # Ilosc platform na ekranie
 WYNIK = 0
 f = open("best_score.txt", "r")
 NAJLEPSZY_WYNIK = int(f.read())
+START_TIME = time.time()
 
 
 FramePerSec = pygame.time.Clock()
@@ -259,6 +258,9 @@ while True:
                 entity.kill()
                 time.sleep(1)
                 okno.fill((255, 0, 0))
+                t = pygame.font.SysFont("Arial", 35)
+                time_played = t.render("Czas gry: "+ str(int(time.time() - START_TIME))+ "s", True, (0, 0, 0))
+                okno.blit(time_played, (WIDTH / 2 - 80, HEIGHT / 2 - 110))
                 a = pygame.font.SysFont("Arial", 35)
                 score = a.render("Twój wynik: " + str(WYNIK), True, (0, 0, 0))
                 okno.blit(score, (WIDTH / 2 - 80, HEIGHT / 2 - 40))
@@ -292,10 +294,13 @@ while True:
     okno.blit(tlo, (0, 0))
     f1 = pygame.font.SysFont("Verdana", 20)
     f2 = pygame.font.SysFont("Verdana", 20)
-    g1 = f1.render("Wynik " + str(WYNIK), True, (123, 255, 0))  # Wyświetlanie wyniku
-    g2 = f2.render("Najlepszy wynik " + str(NAJLEPSZY_WYNIK), True, (123, 255, 0))  # Wyświetlanie wyniku
+    f3 = pygame.font.SysFont("Verdana", 20)
+    g1 = f1.render("Wynik: " + str(WYNIK) + "pkt", True, (0, 0, 0))  # Wyświetlanie wyniku
+    g2 = f2.render("Najlepszy wynik: " + str(NAJLEPSZY_WYNIK) + "pkt", True, (0, 0, 0))  # Wyświetlanie wyniku
+    g3 = f3.render("Czas gry: " + str(int(time.time() - START_TIME)) + "s", True, (0, 0, 0))
     okno.blit(g1, (WIDTH / 2 - 50, 10))
     okno.blit(g2, (WIDTH - 300, 10))
+    okno.blit(g3, (100, 10))
 
     for obiekt in wszystkie_sprity:
         okno.blit(obiekt.surf, obiekt.rect)
