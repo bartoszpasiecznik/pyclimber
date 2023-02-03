@@ -295,10 +295,13 @@ while True:
     f1 = pygame.font.SysFont("Verdana", 20)
     f2 = pygame.font.SysFont("Verdana", 20)
     f3 = pygame.font.SysFont("Verdana", 20)
-    g1 = f1.render("Wynik: " + str(WYNIK) + "pkt", True, (0, 0, 0))  # Wyświetlanie wyniku
-    g2 = f2.render("Najlepszy wynik: " + str(NAJLEPSZY_WYNIK) + "pkt", True, (0, 0, 0))  # Wyświetlanie wyniku
+    # Wyswietlanie wyniku
+    g1 = f1.render("Wynik: " + str(WYNIK) + "pkt", True, (0, 0, 0))
+    # Wyswietlanie najlepszego wyniku
+    g2 = f2.render("Najlepszy wynik: " + str(NAJLEPSZY_WYNIK) + "pkt", True, (0, 0, 0))
+    # Wyswietlanie czasu gry
     g3 = f3.render("Czas gry: " + str(int(time.time() - START_TIME)) + "s", True, (0, 0, 0))
-    okno.blit(g1, (WIDTH / 2 - 50, 10))
+    okno.blit(g1, (WIDTH / 2 - 70, 10))
     okno.blit(g2, (WIDTH - 300, 10))
     okno.blit(g3, (100, 10))
 
